@@ -1,0 +1,1 @@
+export { default } from "file:///C:/Users/varma/Documents/Code/smart-meal-planner/Smart-Meal-Planner/App/node_modules/@nuxt/vite-builder/dist/vite-node-entry.mjs"
