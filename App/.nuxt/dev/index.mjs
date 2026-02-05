@@ -2578,10 +2578,18 @@ async function getIslandContext(event) {
 	return ctx;
 }
 
+const _lazy_3Awrwj = () => Promise.resolve().then(function () { return generateGroceryList_post$1; });
+const _lazy_u5zSnL = () => Promise.resolve().then(function () { return generateMealPlan_post$1; });
+const _lazy_syNduF = () => Promise.resolve().then(function () { return recipes; });
+const _lazy_TqhEmD = () => Promise.resolve().then(function () { return superstore$1; });
 const _lazy_UciQvu = () => Promise.resolve().then(function () { return renderer$1; });
 
 const handlers = [
   { route: '', handler: _LRqvZL, lazy: false, middleware: true, method: undefined },
+  { route: '/api/generate-grocery-list', handler: _lazy_3Awrwj, lazy: true, middleware: false, method: "post" },
+  { route: '/api/generate-meal-plan', handler: _lazy_u5zSnL, lazy: true, middleware: false, method: "post" },
+  { route: '/api/recipes', handler: _lazy_syNduF, lazy: true, middleware: false, method: undefined },
+  { route: '/api/superstore', handler: _lazy_TqhEmD, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_error', handler: _lazy_UciQvu, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_island/**', handler: _SxA8c9, lazy: false, middleware: false, method: undefined },
   { route: '/**', handler: _lazy_UciQvu, lazy: true, middleware: false, method: undefined }
@@ -2922,6 +2930,512 @@ const styles = {};
 const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: styles
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const generateGroceryList_post = defineEventHandler(async (event) => {
+  const body = await readBody(event);
+  const { mealPlan, postalCode } = body;
+  if (!mealPlan || mealPlan.length === 0) {
+    throw createError({
+      statusCode: 400,
+      message: "Meal plan is required"
+    });
+  }
+  const consolidatedIngredients = /* @__PURE__ */ new Map();
+  for (const day of mealPlan) {
+    const allMeals = [day.breakfast, day.lunch, day.dinner];
+    for (const meal of allMeals) {
+      for (const ingredient of meal.ingredients) {
+        const key = ingredient.name.toLowerCase();
+        if (consolidatedIngredients.has(key)) {
+          const existing = consolidatedIngredients.get(key);
+          existing.quantity += ingredient.quantity;
+        } else {
+          consolidatedIngredients.set(key, { ...ingredient });
+        }
+      }
+    }
+  }
+  const groceryList = [];
+  for (const [name, ingredient] of consolidatedIngredients) {
+    let price = 0;
+    try {
+      const searchResult = await $fetch("/api/superstore", {
+        query: { q: ingredient.name, postal: postalCode }
+      });
+      if (searchResult.products && searchResult.products.length > 0) {
+        price = searchResult.products[0].price;
+      }
+    } catch (error) {
+      price = estimatePrice(ingredient);
+    }
+    groceryList.push({
+      name: ingredient.name,
+      quantity: Math.ceil(ingredient.quantity * 10) / 10,
+      // Round to 1 decimal
+      unit: ingredient.unit,
+      category: ingredient.category,
+      price
+    });
+  }
+  groceryList.sort((a, b) => a.category.localeCompare(b.category));
+  const totalCost = groceryList.reduce((sum, item) => sum + item.price, 0);
+  const totalIngredients = mealPlan.reduce((sum, day) => {
+    return sum + day.breakfast.ingredients.length + day.lunch.ingredients.length + day.dinner.ingredients.length;
+  }, 0);
+  const consolidationSavings = (totalIngredients - groceryList.length) * 2.5;
+  return {
+    success: true,
+    groceryList,
+    summary: {
+      totalItems: groceryList.length,
+      totalCost: Math.round(totalCost * 100) / 100,
+      estimatedSavings: Math.round(consolidationSavings * 100) / 100,
+      ingredientsConsolidated: totalIngredients - groceryList.length
+    }
+  };
+});
+function estimatePrice(ingredient) {
+  const priceEstimates = {
+    // Proteins (per 100g or per item)
+    "chicken breast": 3.99,
+    "ground beef": 4.49,
+    "salmon": 6.99,
+    "tofu": 3.49,
+    "eggs": 0.5,
+    // per egg
+    "black beans": 1.29,
+    // Carbs
+    "brown rice": 2.99,
+    // per cup equivalent
+    "quinoa": 4.49,
+    "oats": 2.49,
+    "pasta": 1.99,
+    "sweet potato": 1.49,
+    "whole wheat tortilla": 0.4,
+    // Vegetables
+    "broccoli": 2.99,
+    "spinach": 3.49,
+    "bell pepper": 1.99,
+    "onion": 0.79,
+    "garlic": 0.99,
+    "tomato": 1.29,
+    "carrots": 1.99,
+    // Dairy
+    "milk": 4.99,
+    "cheddar cheese": 5.99,
+    "greek yogurt": 4.49,
+    // Fats & Others
+    "olive oil": 7.99,
+    "avocado": 2.49,
+    "almonds": 5.99,
+    "soy sauce": 3.99,
+    "blueberries": 4.99,
+    "honey": 5.99,
+    "lemon": 0.99,
+    "lime": 0.99
+  };
+  const basePrice = priceEstimates[ingredient.name.toLowerCase()] || 2.99;
+  const multiplier = ingredient.quantity > 1 ? Math.ceil(ingredient.quantity) : 1;
+  return Math.round(basePrice * multiplier * 100) / 100;
+}
+
+const generateGroceryList_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: generateGroceryList_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const recipeDatabase = [
+  // Chicken-based recipes
+  {
+    id: "chicken-rice-bowl",
+    name: "Grilled Chicken Rice Bowl",
+    description: "Protein-packed bowl with tender chicken and brown rice",
+    calories: 520,
+    protein: 42,
+    carbs: 48,
+    fat: 14,
+    prepTime: 15,
+    cookTime: 25,
+    ingredients: [
+      { name: "chicken breast", category: "protein", quantity: 150, unit: "g" },
+      { name: "brown rice", category: "carbs", quantity: 1, unit: "cup" },
+      { name: "broccoli", category: "vegetables", quantity: 1, unit: "cup" },
+      { name: "olive oil", category: "fats", quantity: 1, unit: "tbsp" },
+      { name: "garlic", category: "vegetables", quantity: 2, unit: "cloves" },
+      { name: "soy sauce", category: "condiments", quantity: 2, unit: "tbsp" }
+    ],
+    instructions: [
+      "Cook brown rice according to package instructions",
+      "Season chicken with salt, pepper, and minced garlic",
+      "Grill chicken until internal temp reaches 165\xB0F",
+      "Steam broccoli until tender",
+      "Assemble bowl with rice, sliced chicken, and broccoli",
+      "Drizzle with soy sauce and olive oil"
+    ]
+  },
+  {
+    id: "chicken-veggie-stir-fry",
+    name: "Chicken Veggie Stir Fry",
+    description: "Quick and healthy stir fry with colorful vegetables",
+    calories: 480,
+    protein: 38,
+    carbs: 42,
+    fat: 16,
+    prepTime: 10,
+    cookTime: 15,
+    ingredients: [
+      { name: "chicken breast", category: "protein", quantity: 150, unit: "g" },
+      { name: "brown rice", category: "carbs", quantity: 0.75, unit: "cup" },
+      { name: "bell pepper", category: "vegetables", quantity: 1, unit: "whole" },
+      { name: "broccoli", category: "vegetables", quantity: 1, unit: "cup" },
+      { name: "onion", category: "vegetables", quantity: 0.5, unit: "whole" },
+      { name: "garlic", category: "vegetables", quantity: 3, unit: "cloves" },
+      { name: "olive oil", category: "fats", quantity: 1.5, unit: "tbsp" },
+      { name: "soy sauce", category: "condiments", quantity: 2, unit: "tbsp" }
+    ],
+    instructions: [
+      "Cook rice and set aside",
+      "Cut chicken into bite-sized pieces",
+      "Heat oil in wok over high heat",
+      "Stir fry chicken until cooked through",
+      "Add vegetables and stir fry for 5 minutes",
+      "Add soy sauce and garlic, toss to combine",
+      "Serve over rice"
+    ]
+  },
+  // Egg-based breakfast recipes
+  {
+    id: "veggie-omelet",
+    name: "Vegetable Omelet",
+    description: "Fluffy omelet loaded with fresh vegetables",
+    calories: 320,
+    protein: 22,
+    carbs: 12,
+    fat: 20,
+    prepTime: 5,
+    cookTime: 10,
+    ingredients: [
+      { name: "eggs", category: "protein", quantity: 3, unit: "whole" },
+      { name: "bell pepper", category: "vegetables", quantity: 0.5, unit: "whole" },
+      { name: "onion", category: "vegetables", quantity: 0.25, unit: "whole" },
+      { name: "spinach", category: "vegetables", quantity: 1, unit: "cup" },
+      { name: "cheddar cheese", category: "dairy", quantity: 30, unit: "g" },
+      { name: "olive oil", category: "fats", quantity: 1, unit: "tbsp" }
+    ],
+    instructions: [
+      "Beat eggs in a bowl with salt and pepper",
+      "Saut\xE9 vegetables in olive oil until soft",
+      "Pour eggs over vegetables",
+      "Cook until edges set, add cheese",
+      "Fold omelet and cook until done"
+    ]
+  },
+  {
+    id: "oatmeal-bowl",
+    name: "Berry Oatmeal Bowl",
+    description: "Hearty oatmeal with fresh berries and nuts",
+    calories: 380,
+    protein: 12,
+    carbs: 58,
+    fat: 12,
+    prepTime: 5,
+    cookTime: 10,
+    ingredients: [
+      { name: "oats", category: "carbs", quantity: 0.5, unit: "cup" },
+      { name: "milk", category: "dairy", quantity: 1, unit: "cup" },
+      { name: "blueberries", category: "fruits", quantity: 0.5, unit: "cup" },
+      { name: "almonds", category: "fats", quantity: 15, unit: "g" },
+      { name: "honey", category: "condiments", quantity: 1, unit: "tbsp" }
+    ],
+    instructions: [
+      "Combine oats and milk in pot",
+      "Cook over medium heat, stirring occasionally",
+      "Once thickened, transfer to bowl",
+      "Top with berries, almonds, and honey"
+    ]
+  },
+  // Salmon recipes
+  {
+    id: "baked-salmon",
+    name: "Herb-Baked Salmon",
+    description: "Tender salmon with herbs and roasted vegetables",
+    calories: 450,
+    protein: 35,
+    carbs: 28,
+    fat: 22,
+    prepTime: 10,
+    cookTime: 20,
+    ingredients: [
+      { name: "salmon", category: "protein", quantity: 150, unit: "g" },
+      { name: "sweet potato", category: "carbs", quantity: 1, unit: "medium" },
+      { name: "broccoli", category: "vegetables", quantity: 1.5, unit: "cup" },
+      { name: "olive oil", category: "fats", quantity: 2, unit: "tbsp" },
+      { name: "garlic", category: "vegetables", quantity: 2, unit: "cloves" },
+      { name: "lemon", category: "fruits", quantity: 0.5, unit: "whole" }
+    ],
+    instructions: [
+      "Preheat oven to 400\xB0F",
+      "Cut sweet potato into cubes",
+      "Toss vegetables with olive oil and garlic",
+      "Place salmon on baking sheet with vegetables",
+      "Bake for 18-20 minutes",
+      "Squeeze lemon over salmon before serving"
+    ]
+  },
+  // Beef recipes
+  {
+    id: "beef-quinoa-bowl",
+    name: "Beef & Quinoa Power Bowl",
+    description: "Lean beef with quinoa and roasted vegetables",
+    calories: 540,
+    protein: 38,
+    carbs: 45,
+    fat: 20,
+    prepTime: 10,
+    cookTime: 25,
+    ingredients: [
+      { name: "ground beef", category: "protein", quantity: 120, unit: "g" },
+      { name: "quinoa", category: "carbs", quantity: 0.75, unit: "cup" },
+      { name: "bell pepper", category: "vegetables", quantity: 1, unit: "whole" },
+      { name: "onion", category: "vegetables", quantity: 0.5, unit: "whole" },
+      { name: "garlic", category: "vegetables", quantity: 2, unit: "cloves" },
+      { name: "olive oil", category: "fats", quantity: 1, unit: "tbsp" }
+    ],
+    instructions: [
+      "Cook quinoa according to package directions",
+      "Brown ground beef in skillet",
+      "Add chopped vegetables and cook until soft",
+      "Season with salt, pepper, and garlic",
+      "Serve beef mixture over quinoa"
+    ]
+  },
+  // Vegetarian options
+  {
+    id: "tofu-stir-fry",
+    name: "Crispy Tofu Stir Fry",
+    description: "Plant-based protein with crispy tofu and vegetables",
+    calories: 420,
+    protein: 24,
+    carbs: 48,
+    fat: 16,
+    prepTime: 15,
+    cookTime: 20,
+    ingredients: [
+      { name: "tofu", category: "protein", quantity: 200, unit: "g" },
+      { name: "brown rice", category: "carbs", quantity: 1, unit: "cup" },
+      { name: "broccoli", category: "vegetables", quantity: 1, unit: "cup" },
+      { name: "bell pepper", category: "vegetables", quantity: 1, unit: "whole" },
+      { name: "onion", category: "vegetables", quantity: 0.5, unit: "whole" },
+      { name: "garlic", category: "vegetables", quantity: 3, unit: "cloves" },
+      { name: "soy sauce", category: "condiments", quantity: 2, unit: "tbsp" },
+      { name: "olive oil", category: "fats", quantity: 1.5, unit: "tbsp" }
+    ],
+    instructions: [
+      "Press tofu to remove excess water",
+      "Cut tofu into cubes",
+      "Cook rice and set aside",
+      "Pan fry tofu in oil until crispy",
+      "Remove tofu, add vegetables to pan",
+      "Stir fry vegetables until tender",
+      "Return tofu to pan with soy sauce",
+      "Serve over rice"
+    ]
+  },
+  {
+    id: "black-bean-bowl",
+    name: "Black Bean Buddha Bowl",
+    description: "Nutritious bowl with black beans and fresh veggies",
+    calories: 460,
+    protein: 18,
+    carbs: 68,
+    fat: 14,
+    prepTime: 10,
+    cookTime: 15,
+    ingredients: [
+      { name: "black beans", category: "protein", quantity: 1, unit: "cup" },
+      { name: "quinoa", category: "carbs", quantity: 0.75, unit: "cup" },
+      { name: "sweet potato", category: "carbs", quantity: 1, unit: "small" },
+      { name: "avocado", category: "fats", quantity: 0.5, unit: "whole" },
+      { name: "spinach", category: "vegetables", quantity: 2, unit: "cup" },
+      { name: "lime", category: "fruits", quantity: 0.5, unit: "whole" }
+    ],
+    instructions: [
+      "Cook quinoa and black beans",
+      "Roast diced sweet potato at 425\xB0F for 20 minutes",
+      "Arrange spinach in bowl",
+      "Top with quinoa, beans, and sweet potato",
+      "Add sliced avocado",
+      "Squeeze lime juice over bowl"
+    ]
+  },
+  // Lunch wraps/sandwiches
+  {
+    id: "chicken-wrap",
+    name: "Grilled Chicken Wrap",
+    description: "Fresh wrap with grilled chicken and vegetables",
+    calories: 380,
+    protein: 32,
+    carbs: 38,
+    fat: 10,
+    prepTime: 10,
+    cookTime: 0,
+    ingredients: [
+      { name: "chicken breast", category: "protein", quantity: 100, unit: "g" },
+      { name: "whole wheat tortilla", category: "carbs", quantity: 1, unit: "large" },
+      { name: "spinach", category: "vegetables", quantity: 1, unit: "cup" },
+      { name: "tomato", category: "vegetables", quantity: 0.5, unit: "whole" },
+      { name: "greek yogurt", category: "dairy", quantity: 2, unit: "tbsp" }
+    ],
+    instructions: [
+      "Warm tortilla slightly",
+      "Spread yogurt on tortilla",
+      "Layer with spinach",
+      "Add sliced grilled chicken",
+      "Top with diced tomato",
+      "Roll tightly and slice in half"
+    ]
+  }
+];
+function getRecipesByCategory(category) {
+  const categoryMap = {
+    breakfast: ["veggie-omelet", "oatmeal-bowl"],
+    lunch: ["chicken-wrap", "black-bean-bowl", "tofu-stir-fry"],
+    dinner: ["chicken-rice-bowl", "chicken-veggie-stir-fry", "baked-salmon", "beef-quinoa-bowl"]
+  };
+  const ids = categoryMap[category] || [];
+  return recipeDatabase.filter((r) => ids.includes(r.id));
+}
+function getAllRecipes() {
+  return recipeDatabase;
+}
+
+const recipes = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  getAllRecipes: getAllRecipes,
+  getRecipesByCategory: getRecipesByCategory,
+  recipeDatabase: recipeDatabase
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const generateMealPlan_post = defineEventHandler(async (event) => {
+  const body = await readBody(event);
+  const { dailyCalories, postalCode } = body;
+  if (!dailyCalories || dailyCalories < 1200 || dailyCalories > 4e3) {
+    throw createError({
+      statusCode: 400,
+      message: "Daily calories must be between 1200 and 4000"
+    });
+  }
+  const breakfastCals = dailyCalories * 0.25;
+  const lunchCals = dailyCalories * 0.35;
+  const dinnerCals = dailyCalories * 0.4;
+  const breakfastRecipes = getRecipesByCategory("breakfast");
+  const lunchRecipes = getRecipesByCategory("lunch");
+  const dinnerRecipes = getRecipesByCategory("dinner");
+  const findBestRecipe = (recipes, targetCals, usedIds) => {
+    return recipes.filter((r) => !usedIds.has(r.id)).sort((a, b) => {
+      const diffA = Math.abs(a.calories - targetCals);
+      const diffB = Math.abs(b.calories - targetCals);
+      return diffA - diffB;
+    })[0];
+  };
+  const mealPlan = [];
+  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  for (const day of days) {
+    const usedIds = /* @__PURE__ */ new Set();
+    const breakfast = findBestRecipe(breakfastRecipes, breakfastCals, usedIds);
+    usedIds.add(breakfast.id);
+    const lunch = findBestRecipe(lunchRecipes, lunchCals, usedIds);
+    usedIds.add(lunch.id);
+    const dinner = findBestRecipe(dinnerRecipes, dinnerCals, usedIds);
+    usedIds.add(dinner.id);
+    const totalCalories = breakfast.calories + lunch.calories + dinner.calories;
+    mealPlan.push({
+      day,
+      breakfast,
+      lunch,
+      dinner,
+      totalCalories
+    });
+  }
+  return {
+    success: true,
+    mealPlan,
+    summary: {
+      targetCalories: dailyCalories,
+      avgDailyCalories: mealPlan.reduce((sum, day) => sum + day.totalCalories, 0) / 7
+    }
+  };
+});
+
+const generateMealPlan_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: generateMealPlan_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const superstore = defineEventHandler(async (event) => {
+  var _a;
+  const query = getQuery$1(event);
+  const searchTerm = query.q;
+  const postalCode = query.postal || "V5K0A1";
+  if (!searchTerm) {
+    throw createError({
+      statusCode: 400,
+      message: "Search term is required"
+    });
+  }
+  try {
+    const response = await $fetch("https://api.pcexpress.ca/product-facade/v3/products/search", {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Site-Banner": "superstore",
+        "X-Apikey": "1im1hL52q9xvta16GlSdYDsTsG0dmyhF",
+        "Origin": "https://www.realcanadiansuperstore.ca"
+      },
+      body: {
+        pagination: {
+          from: 0,
+          size: 20
+        },
+        banner: "superstore",
+        query: searchTerm,
+        locale: "en",
+        postalCode
+      }
+    });
+    const products = ((_a = response.results) == null ? void 0 : _a.map((item) => {
+      var _a2, _b, _c, _d;
+      return {
+        code: item.code,
+        name: item.name || item.description,
+        brand: item.brand || "No Name",
+        price: ((_b = (_a2 = item.prices) == null ? void 0 : _a2.price) == null ? void 0 : _b.value) || 0,
+        unit: ((_d = (_c = item.prices) == null ? void 0 : _c.price) == null ? void 0 : _d.unit) || "each",
+        description: item.description || "",
+        imageUrl: item.imageUrl
+      };
+    })) || [];
+    return {
+      success: true,
+      count: products.length,
+      products
+    };
+  } catch (error) {
+    console.error("Superstore API Error:", error);
+    return {
+      success: false,
+      count: 0,
+      products: [],
+      error: "Unable to fetch real-time prices. Please try again later."
+    };
+  }
+});
+
+const superstore$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: superstore
 }, Symbol.toStringTag, { value: 'Module' }));
 
 function renderPayloadResponse(ssrContext) {
