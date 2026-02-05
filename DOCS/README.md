@@ -2,7 +2,7 @@
 
 An AI-powered meal planning application built with Nuxt 3 that optimizes ingredient usage and provides real-time pricing from Real Canadian Superstore.
 
-
+*** if images aren't displaying here, please see img folder in assets ***
 
 ![Landing page screenshot](App\assets\img\ScreenShot.png)
 ![screenshot showing grocery list](App\assets\img\ScreenShotGroceries.png)
