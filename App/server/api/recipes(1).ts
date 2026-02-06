@@ -259,6 +259,182 @@ export const recipeDatabase: Recipe[] = [
       'Top with diced tomato',
       'Roll tightly and slice in half'
     ]
+  },
+
+  // More breakfast options
+  {
+    id: 'scrambled-eggs-toast',
+    name: 'Scrambled Eggs & Toast',
+    description: 'Classic protein-packed breakfast',
+    calories: 350,
+    protein: 20,
+    carbs: 35,
+    fat: 12,
+    prepTime: 5,
+    cookTime: 8,
+    ingredients: [
+      { name: 'eggs', category: 'protein', quantity: 2, unit: 'whole' },
+      { name: 'whole wheat bread', category: 'carbs', quantity: 2, unit: 'slices' },
+      { name: 'butter', category: 'fats', quantity: 1, unit: 'tbsp' },
+      { name: 'milk', category: 'dairy', quantity: 2, unit: 'tbsp' }
+    ],
+    instructions: [
+      'Beat eggs with milk',
+      'Melt butter in pan',
+      'Scramble eggs until fluffy',
+      'Toast bread',
+      'Serve together'
+    ]
+  },
+  {
+    id: 'greek-yogurt-parfait',
+    name: 'Greek Yogurt Parfait',
+    description: 'Creamy yogurt with berries and granola',
+    calories: 340,
+    protein: 18,
+    carbs: 45,
+    fat: 8,
+    prepTime: 5,
+    cookTime: 0,
+    ingredients: [
+      { name: 'greek yogurt', category: 'dairy', quantity: 1, unit: 'cup' },
+      { name: 'blueberries', category: 'fruits', quantity: 0.5, unit: 'cup' },
+      { name: 'strawberries', category: 'fruits', quantity: 0.5, unit: 'cup' },
+      { name: 'granola', category: 'carbs', quantity: 0.25, unit: 'cup' },
+      { name: 'honey', category: 'condiments', quantity: 1, unit: 'tbsp' }
+    ],
+    instructions: [
+      'Layer yogurt in bowl',
+      'Add berries on top',
+      'Sprinkle with granola',
+      'Drizzle honey over everything'
+    ]
+  },
+  {
+    id: 'protein-pancakes',
+    name: 'Protein Pancakes',
+    description: 'Fluffy pancakes with banana',
+    calories: 380,
+    protein: 22,
+    carbs: 52,
+    fat: 8,
+    prepTime: 10,
+    cookTime: 15,
+    ingredients: [
+      { name: 'oats', category: 'carbs', quantity: 0.5, unit: 'cup' },
+      { name: 'eggs', category: 'protein', quantity: 2, unit: 'whole' },
+      { name: 'banana', category: 'fruits', quantity: 1, unit: 'whole' },
+      { name: 'milk', category: 'dairy', quantity: 0.25, unit: 'cup' },
+      { name: 'protein powder', category: 'protein', quantity: 1, unit: 'scoop' }
+    ],
+    instructions: [
+      'Blend all ingredients until smooth',
+      'Heat non-stick pan',
+      'Pour batter to make pancakes',
+      'Cook until bubbles form, flip',
+      'Serve with berries'
+    ]
+  },
+  {
+    id: 'avocado-toast',
+    name: 'Avocado Toast with Egg',
+    description: 'Trendy and nutritious breakfast',
+    calories: 360,
+    protein: 16,
+    carbs: 38,
+    fat: 18,
+    prepTime: 5,
+    cookTime: 5,
+    ingredients: [
+      { name: 'whole wheat bread', category: 'carbs', quantity: 2, unit: 'slices' },
+      { name: 'avocado', category: 'fats', quantity: 0.5, unit: 'whole' },
+      { name: 'eggs', category: 'protein', quantity: 1, unit: 'whole' },
+      { name: 'tomato', category: 'vegetables', quantity: 0.25, unit: 'whole' },
+      { name: 'lime', category: 'fruits', quantity: 0.25, unit: 'whole' }
+    ],
+    instructions: [
+      'Toast bread',
+      'Mash avocado with lime juice',
+      'Fry or poach egg',
+      'Spread avocado on toast',
+      'Top with egg and sliced tomato'
+    ]
+  },
+  {
+    id: 'breakfast-burrito',
+    name: 'Breakfast Burrito',
+    description: 'Hearty wrap with eggs and veggies',
+    calories: 420,
+    protein: 24,
+    carbs: 48,
+    fat: 14,
+    prepTime: 10,
+    cookTime: 10,
+    ingredients: [
+      { name: 'whole wheat tortilla', category: 'carbs', quantity: 1, unit: 'large' },
+      { name: 'eggs', category: 'protein', quantity: 2, unit: 'whole' },
+      { name: 'black beans', category: 'protein', quantity: 0.25, unit: 'cup' },
+      { name: 'bell pepper', category: 'vegetables', quantity: 0.25, unit: 'whole' },
+      { name: 'onion', category: 'vegetables', quantity: 0.25, unit: 'whole' },
+      { name: 'cheddar cheese', category: 'dairy', quantity: 20, unit: 'g' }
+    ],
+    instructions: [
+      'Scramble eggs',
+      'Sauté peppers and onions',
+      'Warm tortilla',
+      'Add eggs, beans, veggies, cheese',
+      'Roll tightly and enjoy'
+    ]
+  },
+  {
+    id: 'smoothie-bowl',
+    name: 'Berry Smoothie Bowl',
+    description: 'Thick smoothie topped with fruits and nuts',
+    calories: 370,
+    protein: 14,
+    carbs: 62,
+    fat: 10,
+    prepTime: 5,
+    cookTime: 0,
+    ingredients: [
+      { name: 'frozen berries', category: 'fruits', quantity: 1.5, unit: 'cup' },
+      { name: 'banana', category: 'fruits', quantity: 1, unit: 'whole' },
+      { name: 'greek yogurt', category: 'dairy', quantity: 0.5, unit: 'cup' },
+      { name: 'milk', category: 'dairy', quantity: 0.25, unit: 'cup' },
+      { name: 'granola', category: 'carbs', quantity: 0.25, unit: 'cup' },
+      { name: 'almonds', category: 'fats', quantity: 10, unit: 'g' }
+    ],
+    instructions: [
+      'Blend berries, banana, yogurt, milk until thick',
+      'Pour into bowl',
+      'Top with granola and almonds',
+      'Add fresh fruit if desired'
+    ]
+  },
+  {
+    id: 'egg-muffins',
+    name: 'Veggie Egg Muffins',
+    description: 'Make-ahead protein muffins',
+    calories: 310,
+    protein: 20,
+    carbs: 18,
+    fat: 16,
+    prepTime: 10,
+    cookTime: 20,
+    ingredients: [
+      { name: 'eggs', category: 'protein', quantity: 3, unit: 'whole' },
+      { name: 'spinach', category: 'vegetables', quantity: 0.5, unit: 'cup' },
+      { name: 'bell pepper', category: 'vegetables', quantity: 0.25, unit: 'whole' },
+      { name: 'onion', category: 'vegetables', quantity: 0.25, unit: 'whole' },
+      { name: 'cheddar cheese', category: 'dairy', quantity: 30, unit: 'g' }
+    ],
+    instructions: [
+      'Preheat oven to 375°F',
+      'Beat eggs in bowl',
+      'Add chopped veggies and cheese',
+      'Pour into muffin tin',
+      'Bake 18-20 minutes'
+    ]
   }
 ];
 
@@ -267,9 +443,35 @@ export const recipeDatabase: Recipe[] = [
  */
 export function getRecipesByCategory(category: 'breakfast' | 'lunch' | 'dinner'): Recipe[] {
   const categoryMap: { [key: string]: string[] } = {
-    breakfast: ['veggie-omelet', 'oatmeal-bowl'],
-    lunch: ['chicken-wrap', 'black-bean-bowl', 'tofu-stir-fry'],
-    dinner: ['chicken-rice-bowl', 'chicken-veggie-stir-fry', 'baked-salmon', 'beef-quinoa-bowl']
+    breakfast: [
+      'veggie-omelet', 
+      'oatmeal-bowl', 
+      'scrambled-eggs-toast',
+      'greek-yogurt-parfait',
+      'protein-pancakes',
+      'avocado-toast',
+      'breakfast-burrito',
+      'smoothie-bowl',
+      'egg-muffins'
+    ],
+    lunch: [
+      'chicken-wrap', 
+      'black-bean-bowl', 
+      'tofu-stir-fry',
+      'baked-salmon', // Can work for lunch too
+      'veggie-omelet', // Can be lunch
+      'greek-yogurt-parfait', // Can be light lunch
+      'avocado-toast' // Can be lunch
+    ],
+    dinner: [
+      'chicken-rice-bowl', 
+      'chicken-veggie-stir-fry', 
+      'baked-salmon', 
+      'beef-quinoa-bowl',
+      'tofu-stir-fry', // Can work for dinner too
+      'black-bean-bowl', // Can be dinner
+      'chicken-wrap' // Can be dinner
+    ]
   };
 
   const ids = categoryMap[category] || [];
