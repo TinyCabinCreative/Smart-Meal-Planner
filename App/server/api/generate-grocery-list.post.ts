@@ -49,9 +49,17 @@ export default defineEventHandler(async (event) => {
       
       if ((searchResult as any).products && (searchResult as any).products.length > 0) {
         price = (searchResult as any).products[0].price;
+      } else {
+        // No products found, use estimate
+        price = estimatePrice(ingredient);
       }
     } catch (error) {
       // Use estimated price if API fails
+      price = estimatePrice(ingredient);
+    }
+    
+    // Final fallback if still zero
+    if (!price || price === 0) {
       price = estimatePrice(ingredient);
     }
 
@@ -104,14 +112,17 @@ function estimatePrice(ingredient: Ingredient): number {
     'tofu': 3.49,
     'eggs': 0.50, // per egg
     'black beans': 1.29,
+    'protein powder': 1.50, // per scoop
     
     // Carbs
-    'brown rice': 2.99, // per cup equivalent
+    'brown rice': 2.99,
     'quinoa': 4.49,
     'oats': 2.49,
     'pasta': 1.99,
     'sweet potato': 1.49,
     'whole wheat tortilla': 0.40,
+    'whole wheat bread': 0.35, // per slice
+    'granola': 5.99,
     
     // Vegetables
     'broccoli': 2.99,
@@ -122,20 +133,26 @@ function estimatePrice(ingredient: Ingredient): number {
     'tomato': 1.29,
     'carrots': 1.99,
     
+    // Fruits
+    'banana': 0.30,
+    'blueberries': 4.99,
+    'strawberries': 5.49,
+    'frozen berries': 4.49,
+    'lemon': 0.99,
+    'lime': 0.99,
+    
     // Dairy
     'milk': 4.99,
     'cheddar cheese': 5.99,
     'greek yogurt': 4.49,
+    'butter': 5.49,
     
     // Fats & Others
     'olive oil': 7.99,
     'avocado': 2.49,
     'almonds': 5.99,
     'soy sauce': 3.99,
-    'blueberries': 4.99,
-    'honey': 5.99,
-    'lemon': 0.99,
-    'lime': 0.99
+    'honey': 5.99
   };
 
   const basePrice = priceEstimates[ingredient.name.toLowerCase()] || 2.99;
