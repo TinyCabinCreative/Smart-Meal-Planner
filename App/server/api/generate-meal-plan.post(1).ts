@@ -1,4 +1,4 @@
-import type { MealPlan, MealPlanRequest } from '~/types';
+gitimport type { MealPlan, MealPlanRequest } from '~/types';
 import { getAllRecipes, getRecipesByCategory } from './recipes';
 
 /**
@@ -41,17 +41,33 @@ export default defineEventHandler(async (event) => {
   const mealPlan: MealPlan[] = [];
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
+  // Track used recipes ACROSS the entire week
+  const usedBreakfasts = new Set<string>();
+  const usedLunches = new Set<string>();
+  const usedDinners = new Set<string>();
+
   for (const day of days) {
-    const usedIds = new Set<string>();
+    // Find best breakfast that hasn't been used this week
+    const breakfast = findBestRecipe(breakfastRecipes, breakfastCals, usedBreakfasts);
+    if (breakfast) usedBreakfasts.add(breakfast.id);
     
-    const breakfast = findBestRecipe(breakfastRecipes, breakfastCals, usedIds);
-    usedIds.add(breakfast.id);
+    // Find best lunch that hasn't been used this week
+    const lunch = findBestRecipe(lunchRecipes, lunchCals, usedLunches);
+    if (lunch) usedLunches.add(lunch.id);
     
-    const lunch = findBestRecipe(lunchRecipes, lunchCals, usedIds);
-    usedIds.add(lunch.id);
-    
-    const dinner = findBestRecipe(dinnerRecipes, dinnerCals, usedIds);
-    usedIds.add(dinner.id);
+    // Find best dinner that hasn't been used this week
+    const dinner = findBestRecipe(dinnerRecipes, dinnerCals, usedDinners);
+    if (dinner) usedDinners.add(dinner.id);
+
+    // If we run out of unique recipes, allow repeats
+    if (!breakfast || !lunch || !dinner) {
+      console.log('Ran out of unique recipes, allowing repeats for:', day);
+      // Reset the sets to allow repeats
+      if (!breakfast) usedBreakfasts.clear();
+      if (!lunch) usedLunches.clear();
+      if (!dinner) usedDinners.clear();
+      continue; // Try this day again
+    }
 
     const totalCalories = breakfast.calories + lunch.calories + dinner.calories;
 
